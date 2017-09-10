@@ -530,8 +530,8 @@ public class TezSessionPoolManager {
       LOG.info("Current queue name is " + queueName + " incoming queue name is " + confQueueName);
       return (queueName == null) ? confQueueName == null : queueName.equals(confQueueName);
     } else {
-      // this session should never be a default session unless something has messed up.
-      throw new HiveException("The pool session " + session + " should have been returned to the pool"); 
+      LOG.info("Skipping default session " + session + " since it is being used.");
+      return false;
     }
   }
 

@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Random;
 
 import org.apache.hadoop.fs.Path;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -227,6 +228,35 @@ public class TestTezSessionPool {
         e.printStackTrace();
         fail();
       }
+    }
+  }
+
+  @Test
+  public void testLlapSessionReuseDefault() {
+    conf.setBoolVar(ConfVars.HIVE_SERVER2_ENABLE_DOAS, false);
+    conf.setVar(ConfVars.HIVE_SERVER2_TEZ_DEFAULT_QUEUES, "default,llap,llap0,llap1");
+    conf.setIntVar(ConfVars.HIVE_SERVER2_TEZ_SESSIONS_PER_DEFAULT_QUEUE, 1);
+    conf.setIntVar(HiveConf.ConfVars.HIVE_SERVER2_LLAP_CONCURRENT_QUERIES, 2);
+    poolManager = new TestTezSessionPoolManager();
+    try {
+      poolManager.setupPool(conf);
+      poolManager.startPool();
+
+    } catch (Exception e) {
+      LOG.error("Initialization error", e);
+      fail();
+    }
+
+    TezSessionState session0 = null;
+    try {
+      session0 = poolManager.getSession(null, conf, true, true);
+      Assert.assertEquals("Session0 should be default", true, session0.isDefault());
+
+      TezSessionState session1 = poolManager.getSession(session0, conf, true, true);
+      Assert.assertEquals("Session1 should be default", true, session1.isDefault());
+    } catch (Exception e) {
+      e.printStackTrace();
+      fail();
     }
   }
 
