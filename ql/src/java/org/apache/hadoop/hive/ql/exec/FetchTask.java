@@ -20,6 +20,7 @@ package org.apache.hadoop.hive.ql.exec;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -53,6 +54,8 @@ public class FetchTask extends Task<FetchWork> implements Serializable {
   private ListSinkOperator sink;
   private int totalRows;
   private static transient final Logger LOG = LoggerFactory.getLogger(FetchTask.class);
+  private transient List preFetchedResults = new ArrayList();
+  private transient boolean preFetched = false;
 
   public FetchTask() {
     super();
@@ -106,6 +109,13 @@ public class FetchTask extends Task<FetchWork> implements Serializable {
   @Override
   public int execute(DriverContext driverContext) {
     assert false;
+    // pre-fetch to make sure that the fetch operator is executed using the execution plan
+    try {
+      preFetched = preFetch(preFetchedResults);
+    } catch (IOException | CommandNeedRetryException e) {
+      throw new RuntimeException("Pre-fetching failed", e);
+    }
+
     return 0;
   }
 
@@ -130,7 +140,7 @@ public class FetchTask extends Task<FetchWork> implements Serializable {
     this.maxRows = maxRows;
   }
 
-  public boolean fetch(List res) throws IOException, CommandNeedRetryException {
+  public boolean preFetch(List res) throws IOException, CommandNeedRetryException {
     sink.reset(res);
     int rowsRet = work.getLeastNumRows();
     if (rowsRet <= 0) {
@@ -165,6 +175,12 @@ public class FetchTask extends Task<FetchWork> implements Serializable {
     } finally {
       totalRows += sink.getNumRows();
     }
+  }
+
+  public boolean fetch(List res) throws IOException, CommandNeedRetryException {
+    res.addAll(preFetchedResults);
+
+    return preFetched;
   }
 
   public boolean isFetchFrom(FileSinkDesc fs) {

@@ -1597,6 +1597,13 @@ public class Driver implements CommandProcessor {
         driverCxt.addToRunnable(tsk);
       }
 
+      // Add fetch Tasks to runnable
+      LOG.info("Checking FetchTask status");
+      if (plan.getFetchTask() != null) {
+        LOG.info("FetchTask found. Adding to the list of runnable tasks.");
+        driverCxt.addToRunnable(plan.getFetchTask());
+      }
+
       perfLogger.PerfLogBegin(CLASS_NAME, PerfLogger.RUN_TASKS);
       // Loop while you either have tasks running, or tasks queued up
       while (!destroyed && driverCxt.isRunning()) {
