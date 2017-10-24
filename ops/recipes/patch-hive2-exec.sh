@@ -7,7 +7,7 @@ cat >/tmp/auto-patch-hive-exec.sh <<"EOL"
 set -e
 
 # Download the patched hive-exec jar from s3 if it's not already there
-HIVE_EXEC_JAR=hive-exec-2.1.0.2.6.1.0-a0f91f84c6959b1c13ffea4f4a9d2ac6b0fe9075.jar
+HIVE_EXEC_JAR=hive-exec-2.1.0.2.6.1.0-e1e1b63ca7fde30c23a0e8715bc716b041cdf6a4.jar
 HIVE_EXEC=/tmp/$HIVE_EXEC_JAR
 if [ ! -f "$HIVE_EXEC" ]; then
     echo "Downloading new hive-exec jar to $HIVE_EXEC"
