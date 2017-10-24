@@ -179,6 +179,7 @@ public class FetchTask extends Task<FetchWork> implements Serializable {
 
   public boolean fetch(List res) throws IOException, CommandNeedRetryException {
     res.addAll(preFetchedResults);
+    preFetchedResults.clear();
 
     return preFetched;
   }
@@ -205,6 +206,7 @@ public class FetchTask extends Task<FetchWork> implements Serializable {
   public void clearFetch() throws HiveException {
     if (fetch != null) {
       fetch.clearFetchContext();
+      preFetchedResults.clear();
     }
   }
 
